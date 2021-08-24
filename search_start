@@ -1,0 +1,33 @@
+$("body").on("click", "#search_start", function (event) {
+        let link = $(this).parents('tr.reports-list-item').find('#link_find').val();
+        let id = $(this).parents('tr.reports-list-item').attr('data-id');
+        let bef_prov = $(this).parents('tr.reports-list-item[data-id='+id+']').find('.edit_val[data-prop=]').text();
+        let active = '';
+        let link_parsing = '';
+        let thisis = $(this);
+        $.ajax({
+            type: "POST",
+            url: ajaxPath + "/ajax.php",
+            data: { code: 'search_provider', id: id, link: link},
+            success: function (msg)
+            {
+                // console.log(msg);
+                let result = JSON.parse(msg);
+                if(result['UF_ACTIVE'] == 1){
+                    active = 'on';
+                }
+                $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('div.active_parser').remove();
+                $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('a.link_provider').remove();
+                $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('div.parser-link').html('<br><div data-id="' + result['ID'] + '" class="active_parser ' + active + '" data-status="' + result['UF_ACTIVE'] + '" title="Активность парсера"></div><br><a class="link_provider" href="' + result['UF_LINK'] + '" target="_blank">' + result['UF_LINK'] + '</a>');
+                if(bef_prov == ''){
+                    $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('select[data-prop=] option[value='+result['UF_XML_ID']+']').prop('selected', true);
+                    $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('select[data-prop=]').focusout();
+                }else{
+                    $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('.edit_val[data-prop=]').click();
+                    $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('select[data-prop=] option[value='+result['UF_XML_ID']+']').prop('selected', true);
+                    $(thisis).parents('tr.reports-list-item[data-id='+id+']').find('select[data-prop=]').focusout();
+                }
+                // $.unblockUI();
+            }
+        });
+    })
